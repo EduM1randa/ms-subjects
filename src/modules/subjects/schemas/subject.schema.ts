@@ -1,13 +1,10 @@
 import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
-
-export enum EducationalLevel {
-    KINDER = 'primary',
-    BASICA = 'secondary',
-    MEDIA = 'tertiary'
-}
+import { EducationalLevel } from "../enum/educational-level.enum";
+import { Types } from "mongoose";
 
 @Schema()
 export class Subject {
+    _id?: Types.ObjectId;
 
     @Prop({ required: true })
     name?: string;
@@ -19,7 +16,10 @@ export class Subject {
     schedule?: string;
 
     @Prop({ required: true })
-    teacher?: number;
+    teacher?: string;
+
+    @Prop({ required: true, type: Types.ObjectId, ref: 'Course' })
+    course?: Types.ObjectId;
 }
 
 export const SubjectSchema = SchemaFactory.createForClass(Subject);

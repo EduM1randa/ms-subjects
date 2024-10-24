@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { SubjectsModule } from './subjects/subjects.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { InscriptionsModule } from './modules/inscriptions/inscriptions.module';
+import { SubjectsModule } from './modules/subjects/subjects.module';
+import { CoursesModule } from './modules/courses/courses.module';
 
 @Module({
   imports: [
@@ -10,7 +12,9 @@ import { ConfigModule } from '@nestjs/config';
       envFilePath: '.env',
     }),
     SubjectsModule, 
-    MongooseModule.forRoot(process.env.MONGO_KEY)
+    MongooseModule.forRoot(process.env.MONGO_KEY), 
+    InscriptionsModule, 
+    CoursesModule
   ],
   controllers: [],
   providers: [],
