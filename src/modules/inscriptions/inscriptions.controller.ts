@@ -12,23 +12,23 @@ export class InscriptionsController {
     return this.inscriptionsService.create(createInscriptionDto);
   }
 
-  @Get()
-  findAll() {
-    return this.inscriptionsService.findAll();
-  }
+  // @Get()
+  // findAll() {
+  //   return this.inscriptionsService.findAll();
+  // }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.inscriptionsService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.inscriptionsService.findOne(+id);
+  // }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateInscriptionDto: UpdateInscriptionDto) {
-    return this.inscriptionsService.update(+id, updateInscriptionDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateInscriptionDto: UpdateInscriptionDto) {
+  //   return this.inscriptionsService.update(+id, updateInscriptionDto);
+  // }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.inscriptionsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.inscriptionsService.remove(+id);
+  // }
 }

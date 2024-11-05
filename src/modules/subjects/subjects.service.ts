@@ -27,7 +27,7 @@ export class SubjectsService {
       throw new Error('Bloque(s) no encontrado(s).');
     }
 
-    //TODO: comprobar que el profesor existe (axios)
+    //TODO: comprobar que el profesor existe (rabbitmq)
 
     const subject = {
       name,
@@ -49,5 +49,9 @@ export class SubjectsService {
   async findBlocks(ids: string[]) {
     const blocks = await this.blockModel.find({ _id: { $in: ids } });
     return blocks.length === ids.length;
+  }
+
+  async findById(id: string) {
+    return this.subjectModel.findById(id);
   }
 }

@@ -1,20 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
 import { UpdateInscriptionDto } from './dto/update-inscription.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Inscription } from './schemas/inscription.schema';
+import { SubjectsService } from '../subjects/subjects.service';
 
 @Injectable()
 export class InscriptionsService {
   constructor (
     @InjectModel(Inscription.name) private inscriptionModel: Model<Inscription>,
+    @Inject() private subjectsService: SubjectsService,
   ) {}
 
   async create(createInscriptionDto: CreateInscriptionDto) {
     const { student, subject } = createInscriptionDto;
     
-    // TODO buscar estudiantes y materias (axios)
+    // TODO buscar estudiante (rabbitmq)
+
+    if(!await this.subjectsService.findById(subject)) {
+      throw new Error('Subject not found');
+    }
 
     if(await this.findInscription(student, subject)) {
       throw new Error('Inscription already exists');

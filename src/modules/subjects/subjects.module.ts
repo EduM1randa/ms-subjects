@@ -20,5 +20,6 @@ import { CoursesModule } from '../courses/courses.module';
   ],
   controllers: [SubjectsController],
   providers: [SubjectsService],
+  exports: [SubjectsService]
 })
 export class SubjectsModule {}
