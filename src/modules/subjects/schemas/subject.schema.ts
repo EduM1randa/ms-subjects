@@ -12,8 +12,8 @@ export class Subject {
     @Prop({ required: true })
     educationalLevel?: EducationalLevel; 
 
-    @Prop({ required: true })
-    schedule?: string;
+    @Prop({ type: [{ type: Types.ObjectId, ref: 'Block' }], required: true })
+    schedule?: Types.ObjectId[];
 
     @Prop({ required: true })
     teacher?: string;

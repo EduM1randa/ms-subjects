@@ -17,7 +17,7 @@ export class CreateSubjectDto {
 
     @IsNotEmpty()
     @IsString()
-    schedule!: string;
+    schedule!: string[];
 
     @IsNumber()
     @IsNotEmpty()

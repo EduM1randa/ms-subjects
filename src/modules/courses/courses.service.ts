@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -14,7 +14,7 @@ export class CoursesService {
   async findById(id: string): Promise<Course> {
     const course = await this.courseModel.findById(id);
     if (!course) {
-      throw new Error('Course not found');
+      throw new HttpException('Course not found', 404);
     }
     return course;
   }
