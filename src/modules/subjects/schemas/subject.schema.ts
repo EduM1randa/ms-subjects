@@ -19,7 +19,7 @@ export class Subject {
     teacher?: string;
 
     @Prop({ required: true, type: Types.ObjectId, ref: 'Course' })
-    course?: Types.ObjectId;
+    course?: Types.ObjectId;    
 }
 
 export const SubjectSchema = SchemaFactory.createForClass(Subject);

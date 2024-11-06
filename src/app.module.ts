@@ -15,7 +15,8 @@ import { EvaluationsModule } from './modules/evaluations/evaluations.module';
     SubjectsModule, 
     MongooseModule.forRoot(process.env.MONGODB_URI_BASE || ''), 
     InscriptionsModule, 
-    CoursesModule, EvaluationsModule
+    CoursesModule, 
+    EvaluationsModule,
   ],
   controllers: [],
   providers: [],
