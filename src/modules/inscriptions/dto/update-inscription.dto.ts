@@ -1,4 +1,12 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateInscriptionDto } from './create-inscription.dto';
+import { IsEnum, IsMongoId, IsNotEmpty } from "class-validator";
+import { InscriptionStatus } from "src/common/enum/inscription-status.enum";
 
-export class UpdateInscriptionDto extends PartialType(CreateInscriptionDto) {}
+export class UpdateInscriptionDto {
+  @IsMongoId()
+  @IsNotEmpty()
+  courseId?: string;
+
+  @IsEnum(InscriptionStatus)
+  @IsNotEmpty()
+  status?: InscriptionStatus;
+}

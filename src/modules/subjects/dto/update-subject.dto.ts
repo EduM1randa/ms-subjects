@@ -1,4 +1,17 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateSubjectDto } from './create-subject.dto';
+import { 
+    IsArray, 
+    IsMongoId, 
+    IsOptional, 
+    IsString 
+} from "class-validator";
 
-export class UpdateSubjectDto extends PartialType(CreateSubjectDto) {}
+export class UpdateSubjectDto {
+    @IsArray()
+    @IsOptional()
+    @IsString({ each: true})
+    schedule?: string[];
+
+    @IsMongoId()
+    @IsOptional()
+    teacherId?: string;
+}

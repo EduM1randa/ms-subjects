@@ -1,13 +1,20 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsDate, IsEnum, IsMongoId, IsNotEmpty, IsString } from "class-validator";
+import { InscriptionStatus } from "../../../common/enum/inscription-status.enum";
 
 export class CreateInscriptionDto {
-    @IsString()
-    @IsNotEmpty()
-    student!: string;
+  @IsMongoId()
+  @IsNotEmpty()
+  studentId?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    subject!: string;
+  @IsMongoId()
+  @IsNotEmpty()
+  courseId?: string;
 
-    // year!: number;
+  @IsDate()
+  @IsNotEmpty()
+  date?: Date;
+
+  @IsEnum(InscriptionStatus)
+  @IsNotEmpty()
+  status?: InscriptionStatus;
 }

@@ -1,29 +1,31 @@
 import {
     IsString,
     IsNotEmpty, 
-    IsEnum,
-    IsNumber
+    IsBoolean,
+    IsMongoId,
+    IsArray,
+    ArrayNotEmpty
 } from 'class-validator';
-import { EducationalLevel } from '../enum/educational-level.enum';
 
 export class CreateSubjectDto {
     @IsString()
     @IsNotEmpty()
-    name!: string;
+    name?: string;
 
-    @IsNotEmpty()
-    @IsEnum(EducationalLevel)
-    educationalLevel!: EducationalLevel; 
+    @IsArray()
+    @ArrayNotEmpty()
+    @IsString({ each: true})
+    schedule?: string[];
 
+    @IsMongoId()
     @IsNotEmpty()
-    @IsString()
-    schedule!: string[];
+    teacherId?: string;
 
-    @IsNumber()
+    @IsMongoId()
     @IsNotEmpty()
-    teacher!: number;
+    courseId?: string;
 
-    @IsString()
+    @IsBoolean()
     @IsNotEmpty()
-    course!: string;
+    isElective?: boolean;
 }

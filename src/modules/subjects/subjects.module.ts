@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Subject, SubjectSchema } from './schemas/subject.schema';
 import { BlockSchema } from './schemas/block.schema';
 import { CoursesModule } from '../courses/courses.module';
+import { InscriptionsModule } from '../inscriptions/inscriptions.module';
 
 @Module({
   imports: [
@@ -16,7 +17,8 @@ import { CoursesModule } from '../courses/courses.module';
       name: 'Block',
       schema: BlockSchema
     }]),
-    CoursesModule 
+    CoursesModule,
+    InscriptionsModule,
   ],
   controllers: [SubjectsController],
   providers: [SubjectsService],

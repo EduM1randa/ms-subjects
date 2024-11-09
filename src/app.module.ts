@@ -5,6 +5,7 @@ import { InscriptionsModule } from './modules/inscriptions/inscriptions.module';
 import { SubjectsModule } from './modules/subjects/subjects.module';
 import { CoursesModule } from './modules/courses/courses.module';
 import { EvaluationsModule } from './modules/evaluations/evaluations.module';
+import { GradesModule } from './modules/grades/grades.module';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { EvaluationsModule } from './modules/evaluations/evaluations.module';
     MongooseModule.forRoot(process.env.MONGODB_URI_BASE || ''), 
     InscriptionsModule, 
     CoursesModule, 
-    EvaluationsModule,
+    EvaluationsModule, GradesModule,
   ],
   controllers: [],
   providers: [],

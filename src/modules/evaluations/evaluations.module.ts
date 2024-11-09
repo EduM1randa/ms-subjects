@@ -15,5 +15,6 @@ import { EvaluationSchema } from './schemas/evaluation.schema';
   ],
   controllers: [EvaluationsController],
   providers: [EvaluationsService],
+  exports: [EvaluationsService],
 })
 export class EvaluationsModule {}
