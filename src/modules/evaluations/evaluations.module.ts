@@ -4,6 +4,7 @@ import { EvaluationsController } from './evaluations.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SubjectsModule } from '../subjects/subjects.module';
 import { EvaluationSchema } from './schemas/evaluation.schema';
+import { UsersModule } from 'src/common/connections/users.module';
 
 @Module({
   imports: [

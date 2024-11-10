@@ -4,6 +4,7 @@ import { GradesController } from './grades.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GradeSchema } from './schemas/grade.schema';
 import { EvaluationsModule } from '../evaluations/evaluations.module';
+import { UsersModule } from 'src/common/connections/users.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { EvaluationsModule } from '../evaluations/evaluations.module';
       schema: GradeSchema 
     }]),
     EvaluationsModule,
+    UsersModule,
   ],
   controllers: [GradesController],
   providers: [GradesService],

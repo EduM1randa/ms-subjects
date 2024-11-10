@@ -5,12 +5,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Grade } from './schemas/grade.schema';
 import { EvaluationsService } from '../evaluations/evaluations.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class GradesService {
   constructor(
     @InjectModel(Grade.name) private gradeModel: Model<Grade>,
     @Inject() private evaluationsService: EvaluationsService,
+    @Inject('USERS_SERVICE') private usersService: ClientProxy,
   ) {}
 
   async create(createGradeDto: CreateGradeDto): Promise<Grade> {
@@ -26,7 +28,10 @@ export class GradesService {
     if(!score) throw new Error('Score is required');
     if(!grade) throw new Error('Grade is required');
 
-    // TODO buscar estudiante (rabbitmq)
+    const existStudent = await this.usersService
+    .send('get-student', studentId)
+    .toPromise();
+    if(!existStudent) throw new Error('Student not found');
 
     if (!(await this.evaluationsService.findById(evaluationId.toString()))) {
       throw new Error('Evaluation not found');

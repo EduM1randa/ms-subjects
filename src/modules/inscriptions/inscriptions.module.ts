@@ -3,8 +3,8 @@ import { InscriptionsService } from './inscriptions.service';
 import { InscriptionsController } from './inscriptions.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { InscriptionSchema } from './schemas/inscription.schema';
-import { SubjectsModule } from '../subjects/subjects.module';
 import { CoursesModule } from '../courses/courses.module';
+import { UsersModule } from 'src/common/connections/users.module';
 
 @Module({
   imports: [MongooseModule.forFeature([{ 
@@ -12,6 +12,7 @@ import { CoursesModule } from '../courses/courses.module';
     schema: InscriptionSchema 
   }]),
   CoursesModule,
+  UsersModule,
   ],
   controllers: [InscriptionsController],
   providers: [InscriptionsService],

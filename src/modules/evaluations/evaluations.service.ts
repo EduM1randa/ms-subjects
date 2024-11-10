@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Evaluation } from './schemas/evaluation.schema';
 import { SubjectsService } from '../subjects/subjects.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class EvaluationsService {
@@ -25,8 +26,6 @@ export class EvaluationsService {
     if(!description) throw new Error('Description is required');
     if(!totalScore) throw new Error('Total score is required');
     if(!date) throw new Error('Date is required');
-
-    // TODO buscar estudiante (rabbitmq)
 
     if(!await this.subjectsService.findById(subjectId.toString())) {
       throw new Error('Subject not found');

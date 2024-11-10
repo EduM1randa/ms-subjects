@@ -6,15 +6,19 @@ import { Model, Types } from 'mongoose';
 import { Inscription } from './schemas/inscription.schema';
 import { CoursesService } from '../courses/courses.service';
 import { InscriptionStatus } from 'src/common/enum/inscription-status.enum';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class InscriptionsService {
   constructor (
     @InjectModel(Inscription.name) private inscriptionModel: Model<Inscription>,
     @Inject() private coursesService: CoursesService,
+    @Inject('USERS_SERVICE') private usersService: ClientProxy,
   ) {}
 
-  async create(createInscriptionDto: CreateInscriptionDto): Promise<Inscription> {
+  async create(
+    createInscriptionDto: CreateInscriptionDto
+  ): Promise<Inscription> {
     const { studentId, courseId, date, status } = createInscriptionDto;
     const student = new Types.ObjectId(studentId);
     const course = new Types.ObjectId(courseId);
@@ -23,7 +27,10 @@ export class InscriptionsService {
     if(!date) throw new Error('Date is required');
     if(!status) throw new Error('Status is required');
     
-    // TODO buscar estudiante (rabbitmq)
+    const existStudent = await this.usersService
+    .send('get-student', studentId)
+    .toPromise();
+    if(!existStudent) throw new Error('Student not found');
 
     if(!await this.coursesService.findById(course.toString())) {
       throw new Error('Subject not found');

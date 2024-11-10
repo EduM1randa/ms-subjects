@@ -6,6 +6,7 @@ import { Subject } from './schemas/subject.schema';
 import { CoursesService } from '../courses/courses.service';
 import { Block } from './schemas/block.schema';
 import { InscriptionsService } from '../inscriptions/inscriptions.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class SubjectsService {
@@ -14,6 +15,7 @@ export class SubjectsService {
     @InjectModel(Block.name) private blockModel:Model<Block>,
     @Inject() private coursesService: CoursesService,
     @Inject() private inscriptionsService: InscriptionsService,
+    @Inject('USERS_SERVICE') private usersService: ClientProxy,
   ){}
 
   async create(createSubjectDto: CreateSubjectDto): Promise<Subject> {
@@ -39,7 +41,10 @@ export class SubjectsService {
       throw new Error('Bloque(s) no encontrado(s).');
     }
 
-    //TODO: comprobar que el profesor existe (rabbitmq)
+    const existTeacher = await this.usersService
+    .send('get-teacher-by-id', teacherId)
+    .toPromise();
+    if(!existTeacher) throw new Error('Profesor no encontrado.');
 
     const subject: Subject = {
       name,

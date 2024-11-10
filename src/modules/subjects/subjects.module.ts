@@ -6,6 +6,7 @@ import { Subject, SubjectSchema } from './schemas/subject.schema';
 import { BlockSchema } from './schemas/block.schema';
 import { CoursesModule } from '../courses/courses.module';
 import { InscriptionsModule } from '../inscriptions/inscriptions.module';
+import { UsersModule } from 'src/common/connections/users.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { InscriptionsModule } from '../inscriptions/inscriptions.module';
     }]),
     CoursesModule,
     InscriptionsModule,
+    UsersModule,
   ],
   controllers: [SubjectsController],
   providers: [SubjectsService],
