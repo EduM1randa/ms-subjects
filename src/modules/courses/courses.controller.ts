@@ -9,22 +9,22 @@ import { Course } from './schemas/course.schema';
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
-  @MessagePattern({ cmd: 'create_course' })
+  @MessagePattern({ cmd: 'create-course' })
   async create(@Payload() createCourseDto: CreateCourseDto): Promise<Course> {
     return await this.coursesService.create(createCourseDto);
   }
 
-  @MessagePattern({ cmd: 'get_all_courses' })
+  @MessagePattern({ cmd: 'get-all-courses' })
   async findAll(): Promise<Course[]> {
     return await this.coursesService.findAll();
   }
 
-  @MessagePattern({ cmd: 'get_course_by_id' })
+  @MessagePattern({ cmd: 'get-course-by-id' })
   async findOne(@Payload() id: string): Promise<Course> {
     return await this.coursesService.findById(id);
   }
 
-  @MessagePattern({ cmd: 'update_course' })
+  @MessagePattern({ cmd: 'update-course' })
   async update(
     @Payload() data: { id: string, updateCourseDto: UpdateCourseDto }
   ): Promise<Course> {
