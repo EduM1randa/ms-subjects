@@ -7,6 +7,7 @@ import { CoursesService } from '../courses/courses.service';
 import { Block } from './schemas/block.schema';
 import { InscriptionsService } from '../inscriptions/inscriptions.service';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class SubjectsService {
@@ -41,9 +42,8 @@ export class SubjectsService {
       throw new Error('Bloque(s) no encontrado(s).');
     }
 
-    const existTeacher = await this.usersService
-    .send('get-teacher-by-id', teacherId)
-    .toPromise();
+    const existTeacher = await lastValueFrom(this.usersService
+    .send('get-teacher-by-id', teacherId));
     if(!existTeacher) throw new Error('Profesor no encontrado.');
 
     const subject: Subject = {

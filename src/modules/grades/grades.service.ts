@@ -6,6 +6,7 @@ import { Model, Types } from 'mongoose';
 import { Grade } from './schemas/grade.schema';
 import { EvaluationsService } from '../evaluations/evaluations.service';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class GradesService {
@@ -28,9 +29,8 @@ export class GradesService {
     if(!score) throw new Error('Score is required');
     if(!grade) throw new Error('Grade is required');
 
-    const existStudent = await this.usersService
-    .send('get-student', studentId)
-    .toPromise();
+    const existStudent = await lastValueFrom(this.usersService
+    .send('get-student', studentId));
     if(!existStudent) throw new Error('Student not found');
 
     if (!(await this.evaluationsService.findById(evaluationId.toString()))) {

@@ -7,6 +7,7 @@ import { Inscription } from './schemas/inscription.schema';
 import { CoursesService } from '../courses/courses.service';
 import { InscriptionStatus } from 'src/common/enum/inscription-status.enum';
 import { ClientProxy } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class InscriptionsService {
@@ -27,9 +28,8 @@ export class InscriptionsService {
     if(!date) throw new Error('Date is required');
     if(!status) throw new Error('Status is required');
     
-    const existStudent = await this.usersService
-    .send('get-student', studentId)
-    .toPromise();
+    const existStudent = await lastValueFrom(this.usersService
+    .send('get-student', studentId));
     if(!existStudent) throw new Error('Student not found');
 
     if(!await this.coursesService.findById(course.toString())) {
