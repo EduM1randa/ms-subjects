@@ -14,8 +14,9 @@ export class CoursesController {
     return await this.coursesService.create(createCourseDto);
   }
 
-  @MessagePattern({ cmd: 'get-all-courses' })
+  @MessagePattern({ cmd: "get-all-courses" })
   async findAll(): Promise<Course[]> {
+    console.log('Getting all courses');
     return await this.coursesService.findAll();
   }
 

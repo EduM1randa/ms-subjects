@@ -11,7 +11,7 @@ export class InscriptionsController {
 
   @MessagePattern({ cmd: 'create_inscription' })
   async create(
-    @Payload() createInscriptionDto: CreateInscriptionDto
+    @Payload() createInscriptionDto: CreateInscriptionDto,
   ): Promise<Inscription> {
     return await this.inscriptionsService.create(createInscriptionDto);
   }
@@ -23,7 +23,7 @@ export class InscriptionsController {
 
   @MessagePattern({ cmd: 'get_inscription_by_student_and_course' })
   async findInscription(
-    @Payload() data: { studentId: string, courseId: string }
+    @Payload() data: { studentId: string; courseId: string },
   ): Promise<Inscription | null> {
     const { studentId, courseId } = data;
     return await this.inscriptionsService.findInscription(studentId, courseId);
@@ -31,7 +31,7 @@ export class InscriptionsController {
 
   @MessagePattern({ cmd: 'update_inscription' })
   async update(
-    @Payload() data: { id: string, updateInscriptionDto: UpdateInscriptionDto }
+    @Payload() data: { id: string; updateInscriptionDto: UpdateInscriptionDto },
   ): Promise<Inscription> {
     const { id, updateInscriptionDto } = data;
     return await this.inscriptionsService.update(id, updateInscriptionDto);

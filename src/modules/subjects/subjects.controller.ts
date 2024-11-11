@@ -12,7 +12,7 @@ export class SubjectsController {
 
   @MessagePattern({ cmd: 'create_subject' })
   async create(
-    @Payload() createSubjectDto: CreateSubjectDto
+    @Payload() createSubjectDto: CreateSubjectDto,
   ): Promise<Subject> {
     return await this.subjectsService.create(createSubjectDto);
   }
@@ -34,7 +34,7 @@ export class SubjectsController {
 
   @MessagePattern({ cmd: 'get_subjects_by_student' })
   async findByStudent(
-    @Payload() data: { studentId: string, year: number }
+    @Payload() data: { studentId: string; year: number },
   ): Promise<Subject[]> {
     const { studentId, year } = data;
     return await this.subjectsService.findSubjectsByStudent(studentId, year);
@@ -42,7 +42,7 @@ export class SubjectsController {
 
   @MessagePattern({ cmd: 'get_subjects_by_teacher' })
   async findByTeacher(
-    @Payload() data: { teacherId: string, year: number }
+    @Payload() data: { teacherId: string; year: number },
   ): Promise<Subject[]> {
     const { teacherId, year } = data;
     return await this.subjectsService.findSubjectsByTeacher(teacherId, year);
@@ -50,7 +50,7 @@ export class SubjectsController {
 
   @MessagePattern({ cmd: 'update_subject' })
   async update(
-    @Payload() data: { id: string, updateSubjectDto: UpdateSubjectDto }
+    @Payload() data: { id: string; updateSubjectDto: UpdateSubjectDto },
   ): Promise<Subject> {
     const { id, updateSubjectDto } = data;
     return await this.subjectsService.update(id, updateSubjectDto);

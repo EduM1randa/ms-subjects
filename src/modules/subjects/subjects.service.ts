@@ -1,4 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
@@ -12,53 +18,54 @@ import { lastValueFrom } from 'rxjs';
 @Injectable()
 export class SubjectsService {
   constructor(
-    @InjectModel(Subject.name) private subjectModel:Model<Subject>,
-    @InjectModel(Block.name) private blockModel:Model<Block>,
+    @InjectModel(Subject.name) private subjectModel: Model<Subject>,
+    @InjectModel(Block.name) private blockModel: Model<Block>,
     @Inject() private coursesService: CoursesService,
     @Inject() private inscriptionsService: InscriptionsService,
     @Inject('USERS_SERVICE') private usersService: ClientProxy,
-  ){}
+  ) {}
 
   async create(createSubjectDto: CreateSubjectDto): Promise<Subject> {
-    const { name, schedule, teacherId, 
-      courseId, isElective 
-    } = createSubjectDto;
+    const { name, schedule, teacherId, courseId, isElective } =
+      createSubjectDto;
     const teacher = new Types.ObjectId(teacherId);
     const course = new Types.ObjectId(courseId);
 
-    if (!name) throw new Error('Nombre es requerido.');
-    if (!schedule || schedule.length === 0) throw new Error('Horario es requerido.');
-    if (!teacher) throw new Error('Profesor es requerido.');
-    if (!course) throw new Error('Curso es requerido.');
-    if (!isElective) throw new Error('Electivo es requerido.');
+    if (!name) throw new BadRequestException('Nombre es requerido.');
+    if (!schedule || schedule.length === 0)
+      throw new BadRequestException('Horario es requerido.');
+    if (!teacher) throw new BadRequestException('Profesor es requerido.');
+    if (!course) throw new BadRequestException('Curso es requerido.');
+    if (!isElective) throw new BadRequestException('Electivo es requerido.');
 
     const courseExists = await this.coursesService.findById(course.toString());
     if (!courseExists) {
-      throw new Error('Curso no encontrado.');
+      throw new NotFoundException('Curso no encontrado.');
     }
 
     const blockExists = await this.findBlocks(schedule);
     if (!blockExists) {
-      throw new Error('Bloque(s) no encontrado(s).');
+      throw new NotFoundException('Bloque(s) no encontrado(s).');
     }
 
-    const existTeacher = await lastValueFrom(this.usersService
-    .send('get-teacher-by-id', teacherId));
-    if(!existTeacher) throw new Error('Profesor no encontrado.');
+    const existTeacher = await lastValueFrom(
+      this.usersService.send('get-teacher-by-id', teacherId),
+    );
+    if (!existTeacher) throw new NotFoundException('Profesor no encontrado.');
 
     const subject: Subject = {
       name,
-      schedule: schedule.map(id => new Types.ObjectId(id)),
+      schedule: schedule.map((id) => new Types.ObjectId(id)),
       teacherId: teacher,
       courseId: courseExists._id,
       isElective,
-    }
+    };
 
     try {
       const createdSubject = new this.subjectModel(subject);
       return createdSubject.save();
     } catch (error) {
-      throw new Error('Error al crear materia.');
+      throw new InternalServerErrorException('Error al crear materia.');
     }
   }
 
@@ -66,11 +73,11 @@ export class SubjectsService {
     try {
       const blocks = await this.blockModel.find();
       if (blocks.length === 0) {
-        throw new Error('No se encontraron bloques.');
+        throw new NotFoundException('No se encontraron bloques.');
       }
       return blocks;
-    } catch(error) {
-      throw new Error('Error al obtener bloques.');
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener bloques.');
     }
   }
 
@@ -80,14 +87,14 @@ export class SubjectsService {
   }
 
   async findById(id: string): Promise<Subject> {
-    try{
+    try {
       const subject = await this.subjectModel.findById(id);
       if (!subject) {
-        throw new Error('Materia no encontrada.');
+        throw new NotFoundException('Materia no encontrada.');
       }
       return subject;
-    } catch(error) {
-      throw new Error('Error al obtener materia.');
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener materia.');
     }
   }
 
@@ -95,71 +102,80 @@ export class SubjectsService {
     try {
       const subjects = await this.subjectModel.find({ courseId });
       if (subjects.length === 0) {
-        throw new Error('No se encontraron materias.');
-      };
+        throw new NotFoundException('No se encontraron materias.');
+      }
       return subjects;
-    } catch(error) {
-      throw new Error('Error al obtener materias.');
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener materias.');
     }
   }
 
   async findSubjectsByStudent(
-    studentId: string, year: number
+    studentId: string,
+    year: number,
   ): Promise<Subject[]> {
     try {
-      const inscription = await this.inscriptionsService
-      .findByStudent(studentId, year);
-  
+      const inscription = await this.inscriptionsService.findByStudent(
+        studentId,
+        year,
+      );
+
       if (!inscription) {
-        throw new Error('Inscripción no encontrada.');
+        throw new NotFoundException('Inscripción no encontrada.');
       }
-  
+
       const subjects = await this.subjectModel.find({
         courseId: inscription.courseId,
       });
-  
-      if(subjects.length === 0) {
-        throw new Error('No se encontraron materias inscritas.');
+
+      if (subjects.length === 0) {
+        throw new NotFoundException('No se encontraron materias inscritas.');
       }
-  
+
       return subjects;
-    } catch(error) {
-      throw new Error('Error al obtener materias.');
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener materias.');
     }
   }
 
   async findSubjectsByTeacher(
-    teacherId: string, year: number
+    teacherId: string,
+    year: number,
   ): Promise<Subject[]> {
     try {
       const subjects = await this.subjectModel.find({ teacherId });
-      const filteredSubjects = subjects.filter(async subject => {
-        const course = await this.coursesService
-        .findById(subject.courseId?.toString() || '');
+      const filteredSubjects = subjects.filter(async (subject) => {
+        const course = await this.coursesService.findById(
+          subject.courseId?.toString() || '',
+        );
         return course.year === year;
       });
-  
-      if(filteredSubjects.length === 0) {
-        throw new Error('No se encontraron materias asignadas.');
+
+      if (filteredSubjects.length === 0) {
+        throw new NotFoundException('No se encontraron materias asignadas.');
       }
       return filteredSubjects;
-    } catch(error) {
-      throw new Error('Error al obtener materias.');
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener materias.');
     }
   }
 
   async update(
-    id: string, updateSubjectDto: CreateSubjectDto
+    id: string,
+    updateSubjectDto: CreateSubjectDto,
   ): Promise<Subject> {
     try {
-      const updatedSubject = await this.subjectModel
-        .findByIdAndUpdate(id, updateSubjectDto, { new: true });
+      const updatedSubject = await this.subjectModel.findByIdAndUpdate(
+        id,
+        updateSubjectDto,
+        { new: true },
+      );
       if (!updatedSubject) {
-        throw new Error('Materia no encontrada.');
+        throw new NotFoundException('Materia no encontrada.');
       }
       return updatedSubject;
-    } catch(error) {
-      throw new Error('Error al actualizar materia.');
+    } catch (error) {
+      throw new InternalServerErrorException('Error al actualizar materia.');
     }
   }
 }

@@ -8,8 +8,8 @@ import { ClientsModule, Transport } from "@nestjs/microservices";
         name: 'USERS_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: [process.env.AMQP_URI ||''],
-          queue: process.env.MS_SUBJECTS_QUEUE, 
+          urls: ['amqps://mfivcrgg:3zQWvCAEyg_q0a7QS7m7e-whP-jp4pYL@prawn.rmq.cloudamqp.com/mfivcrgg'],
+          queue: 'users_subjects_queue', 
           queueOptions: {
             durable: false
           }

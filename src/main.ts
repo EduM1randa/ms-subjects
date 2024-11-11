@@ -8,8 +8,8 @@ async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.RMQ,
     options: {
-      urls: [process.env.AMQP_URI||''],
-      queue: process.env.API_QUEUE,
+      urls: ['amqps://mfivcrgg:3zQWvCAEyg_q0a7QS7m7e-whP-jp4pYL@prawn.rmq.cloudamqp.com/mfivcrgg'],
+      queue: 'subjects_queue',
       queueOptions: {
         durable: false
       },
@@ -17,5 +17,6 @@ async function bootstrap() {
   })
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new RmqExceptionFilter());
+  await app.listen();
 }
 bootstrap();

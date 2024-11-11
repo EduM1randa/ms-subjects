@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,14 +15,14 @@ export class CoursesService {
   constructor(@InjectModel(Course.name) private courseModel: Model<Course>) {}
 
   async findById(id: string): Promise<Course> {
-    try{
+    try {
       const course = await this.courseModel.findById(id);
       if (!course) {
-        throw new Error('Course not found');
+        throw new NotFoundException('Course not found');
       }
-    return course;
+      return course;
     } catch (error) {
-      throw new Error('Failed to retrieve course');
+      throw new InternalServerErrorException('Failed to retrieve course');
     }
   }
 
@@ -26,22 +30,25 @@ export class CoursesService {
     try {
       const courses = await this.courseModel.find();
       if (courses.length === 0) {
-        throw new Error('No courses found');
+        throw new NotFoundException('No courses found');
       }
       return courses;
     } catch (error) {
-      throw new Error('Failed to retrieve courses');
+      throw new InternalServerErrorException('Failed to retrieve courses');
     }
   }
 
   async create(createCourseDto: CreateCourseDto): Promise<Course> {
-    const { name, year, educationalLevel: educationalLevelString } = createCourseDto;
-    const educationalLevel = EducationalLevel[
-      educationalLevelString as keyof typeof EducationalLevel
-    ];
+    const {
+      name,
+      year,
+      educationalLevel: educationalLevelString,
+    } = createCourseDto;
+    const educationalLevel =
+      EducationalLevel[educationalLevelString as keyof typeof EducationalLevel];
 
     if (!name || !year || !educationalLevel) {
-      throw new Error('Missing required fields');
+      throw new NotFoundException('Missing required fields');
     }
 
     const validationPreBasic = ['1°', '2°'];
@@ -51,51 +58,45 @@ export class CoursesService {
       educationalLevel === EducationalLevel.PRE_BASICA &&
       !validationPreBasic.includes(name)
     ) {
-      throw new Error('Invalid course name for pre-basic educational level');
+      throw new NotFoundException('Invalid course name for Pre-Basica');
     }
     if (
       educationalLevel === EducationalLevel.BASICA &&
       !validationBasic.includes(name)
     ) {
-      throw new Error('Invalid course name for basic educational level');
+      throw new NotFoundException('Invalid course name for Basica');
     }
     if (
       educationalLevel === EducationalLevel.MEDIA &&
       !validationMedia.includes(name)
     ) {
-      throw new Error('Invalid course name for media educational level');
+      throw new NotFoundException('Invalid course name for Media');
     }
 
-    const currentYear = new Date().getFullYear();
-    if (year < currentYear) {
-      throw new Error('Year must be the current year');
-    }
-
-    const course: Course = {
+    const course = new this.courseModel({
       name,
-      educationalLevel,
       year,
-    };
+      educationalLevel,
+    });
 
-    try{
-      const createdCourse = new this.courseModel(course);
-      return createdCourse.save();
+    try {
+      return await course.save();
     } catch (error) {
-      throw new Error('Failed to create course');
+      throw new InternalServerErrorException('Failed to create course');
     }
   }
 
   async update(id: string, updateCourseDto: UpdateCourseDto): Promise<Course> {
     try {
-      const existingCourse = await this.courseModel
-        .findByIdAndUpdate(id, updateCourseDto, { new: true });
-  
-      if (!existingCourse) {
-        throw new Error('Course not found');
+      const updatedCourse = await this.courseModel
+        .findByIdAndUpdate(id, updateCourseDto, { new: true })
+        .exec();
+      if (!updatedCourse) {
+        throw new NotFoundException('Course not found');
       }
-      return existingCourse;
+      return updatedCourse;
     } catch (error) {
-      throw new Error('Failed to update course');
+      throw new InternalServerErrorException('Failed to update course');
     }
   }
 }

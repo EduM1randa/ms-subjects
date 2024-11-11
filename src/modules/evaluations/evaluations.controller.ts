@@ -11,14 +11,14 @@ export class EvaluationsController {
 
   @MessagePattern({ cmd: 'create_evaluation' })
   async create(
-    @Payload() createEvaluationDto: CreateEvaluationDto
+    @Payload() createEvaluationDto: CreateEvaluationDto,
   ): Promise<Evaluation> {
     return await this.evaluationsService.create(createEvaluationDto);
   }
 
   @MessagePattern({ cmd: 'update_evaluation' })
   async update(
-    @Payload() data: { id: string, updateEvaluationDto: UpdateEvaluationDto }
+    @Payload() data: { id: string; updateEvaluationDto: UpdateEvaluationDto },
   ): Promise<Evaluation> {
     const { id, updateEvaluationDto } = data;
     return await this.evaluationsService.update(id, updateEvaluationDto);

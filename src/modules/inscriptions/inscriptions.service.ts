@@ -1,4 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateInscriptionDto } from './dto/create-inscription.dto';
 import { UpdateInscriptionDto } from './dto/update-inscription.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,39 +17,41 @@ import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class InscriptionsService {
-  constructor (
+  constructor(
     @InjectModel(Inscription.name) private inscriptionModel: Model<Inscription>,
     @Inject() private coursesService: CoursesService,
     @Inject('USERS_SERVICE') private usersService: ClientProxy,
   ) {}
 
   async create(
-    createInscriptionDto: CreateInscriptionDto
+    createInscriptionDto: CreateInscriptionDto,
   ): Promise<Inscription> {
     const { studentId, courseId, date, status } = createInscriptionDto;
     const student = new Types.ObjectId(studentId);
     const course = new Types.ObjectId(courseId);
-    if(!student) throw new Error('Student is required');
-    if(!course) throw new Error('course is required');
-    if(!date) throw new Error('Date is required');
-    if(!status) throw new Error('Status is required');
-    
-    const existStudent = await lastValueFrom(this.usersService
-    .send('get-student', studentId));
-    if(!existStudent) throw new Error('Student not found');
+    if (!student) throw new BadRequestException('Student is required');
+    if (!course) throw new BadRequestException('course is required');
+    if (!date) throw new BadRequestException('Date is required');
+    if (!status) throw new BadRequestException('Status is required');
 
-    if(!await this.coursesService.findById(course.toString())) {
-      throw new Error('Subject not found');
+    const existStudent = await lastValueFrom(
+      this.usersService.send('get-student', studentId),
+    );
+    if (!existStudent) throw new NotFoundException('Student not found');
+
+    if (!(await this.coursesService.findById(course.toString()))) {
+      throw new NotFoundException('Subject not found');
     }
 
-    if(await this.findInscription(student.toString(), course.toString())) {
-      throw new Error('Inscription already exists');
+    if (await this.findInscription(student.toString(), course.toString())) {
+      throw new BadRequestException('Inscription already exists');
     }
 
-    if(new Date(date) < new Date()) throw new Error('Date must be greater than');
-    if(!Object.values(InscriptionStatus)
-      .includes(status)) throw new Error('Invalid status');
-    
+    if (new Date(date) < new Date())
+      throw new BadRequestException('Date must be greater than');
+    if (!Object.values(InscriptionStatus).includes(status))
+      throw new BadRequestException('Invalid status');
+
     const inscription: Inscription = {
       studentId: student,
       courseId: course,
@@ -54,17 +62,18 @@ export class InscriptionsService {
     try {
       const createdInscription = new this.inscriptionModel(inscription);
       return createdInscription.save();
-    } catch(error) {
-      throw new Error('Error creating inscription');
+    } catch (error) {
+      throw new InternalServerErrorException('Error creating inscription');
     }
   }
 
   async findInscription(
-    student: string, course: string
+    student: string,
+    course: string,
   ): Promise<Inscription | null> {
-    const exist = await this.inscriptionModel.findOne({ 
-      studentId: student, 
-      courseId: course 
+    const exist = await this.inscriptionModel.findOne({
+      studentId: student,
+      courseId: course,
     });
     return exist;
   }
@@ -72,23 +81,29 @@ export class InscriptionsService {
   async findAll(): Promise<Inscription[]> {
     try {
       const inscriptions = await this.inscriptionModel.find();
-      if(inscriptions.length === 0) throw new Error('Inscriptions not found');
+      if (inscriptions.length === 0)
+        throw new NotFoundException('Inscriptions not found');
       return inscriptions;
-    } catch(error) {
-      throw new Error('Error getting inscriptions');
+    } catch (error) {
+      throw new InternalServerErrorException('Error getting inscriptions');
     }
   }
 
   async update(
-    id: string, updateInscriptionDto: UpdateInscriptionDto
+    id: string,
+    updateInscriptionDto: UpdateInscriptionDto,
   ): Promise<Inscription> {
     try {
-      const updatedInscription = await this.inscriptionModel
-        .findByIdAndUpdate(id, updateInscriptionDto, { new: true });
-      if(!updatedInscription) throw new Error('Inscription not found');
+      const updatedInscription = await this.inscriptionModel.findByIdAndUpdate(
+        id,
+        updateInscriptionDto,
+        { new: true },
+      );
+      if (!updatedInscription)
+        throw new NotFoundException('Inscription not found');
       return updatedInscription;
-    } catch(error) {
-      throw new Error('Error updating inscription');
+    } catch (error) {
+      throw new InternalServerErrorException('Error updating inscription');
     }
   }
 
@@ -98,7 +113,8 @@ export class InscriptionsService {
       createAt: year,
       status: InscriptionStatus.ACTIVE,
     });
-    if(!activeInscription) throw new Error('Inscription not found');
+    if (!activeInscription)
+      throw new NotFoundException('Inscription not found');
     return activeInscription;
   }
 }
