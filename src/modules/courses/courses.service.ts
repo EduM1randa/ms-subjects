@@ -42,12 +42,11 @@ export class CoursesService {
     const {
       name,
       year,
-      educationalLevel: educationalLevelString,
+      educationalLevel,
+      letter,
     } = createCourseDto;
-    const educationalLevel =
-      EducationalLevel[educationalLevelString as keyof typeof EducationalLevel];
 
-    if (!name || !year || !educationalLevel) {
+    if (!name || !year || !educationalLevel || !letter) {
       throw new NotFoundException('Missing required fields');
     }
 
@@ -73,13 +72,13 @@ export class CoursesService {
       throw new NotFoundException('Invalid course name for Media');
     }
 
-    const course = new this.courseModel({
-      name,
-      year,
-      educationalLevel,
-    });
-
     try {
+      const course = new this.courseModel({
+        name,
+        year,
+        educationalLevel,
+        letter,
+      });
       return await course.save();
     } catch (error) {
       throw new InternalServerErrorException('Failed to create course');

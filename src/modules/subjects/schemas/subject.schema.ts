@@ -8,7 +8,7 @@ export class Subject {
     @Prop({ required: true })
     name?: string;
 
-    @Prop({ type: [{ type: Types.ObjectId, ref: 'Block' }], required: true })
+    @Prop({ type: [{ type: Types.ObjectId, ref: 'Schedule' }], required: true })
     schedule?: Types.ObjectId[];
 
     @Prop({ required: true, type: Types.ObjectId })

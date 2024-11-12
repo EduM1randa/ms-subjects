@@ -14,6 +14,9 @@ export class Course {
 
     @Prop({ required: true })
     year?: number;
+
+    @Prop({ required: true })
+    letter?: string;
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);

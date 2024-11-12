@@ -4,7 +4,6 @@ import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { Subject } from './schemas/subject.schema';
-import { Block } from './schemas/block.schema';
 
 @Controller('subjects')
 export class SubjectsController {
@@ -15,11 +14,6 @@ export class SubjectsController {
     @Payload() createSubjectDto: CreateSubjectDto,
   ): Promise<Subject> {
     return await this.subjectsService.create(createSubjectDto);
-  }
-
-  @MessagePattern({ cmd: 'get_blocks' })
-  async getBlocks(): Promise<Block[]> {
-    return await this.subjectsService.getBlocks();
   }
 
   @MessagePattern({ cmd: 'get_subject_by_id' })

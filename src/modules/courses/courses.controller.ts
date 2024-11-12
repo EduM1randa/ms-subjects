@@ -11,12 +11,12 @@ export class CoursesController {
 
   @MessagePattern({ cmd: 'create-course' })
   async create(@Payload() createCourseDto: CreateCourseDto): Promise<Course> {
+    console.log('createCourseDto', createCourseDto);
     return await this.coursesService.create(createCourseDto);
   }
 
   @MessagePattern({ cmd: "get-all-courses" })
   async findAll(): Promise<Course[]> {
-    console.log('Getting all courses');
     return await this.coursesService.findAll();
   }
 

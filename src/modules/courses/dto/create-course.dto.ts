@@ -1,7 +1,9 @@
 import { 
     IsEnum,
     IsNotEmpty, 
-    IsNumber, 
+    IsNumber,
+    IsString,
+    Matches, 
 } from "class-validator";
 import { IsCourseName } from "../../../common/decorators/course-validator.decorator";
 import { EducationalLevel } from "src/common/enum/educational-level.enum";
@@ -18,4 +20,9 @@ export class CreateCourseDto {
     @IsNumber()
     @IsNotEmpty()
     year?: number;
+
+    @IsNotEmpty()
+    @IsString()
+    @Matches(/^[A-Z]$/)
+    letter?: string;
 }

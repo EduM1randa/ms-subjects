@@ -3,10 +3,11 @@ import { SubjectsService } from './subjects.service';
 import { SubjectsController } from './subjects.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Subject, SubjectSchema } from './schemas/subject.schema';
-import { BlockSchema } from './schemas/block.schema';
+import { BlockSchema } from '../schedules/schemas/block.schema';
 import { CoursesModule } from '../courses/courses.module';
 import { InscriptionsModule } from '../inscriptions/inscriptions.module';
 import { UsersModule } from 'src/common/connections/users.module';
+import { SchedulesModule } from '../schedules/schedules.module';
 
 @Module({
   imports: [
@@ -14,13 +15,10 @@ import { UsersModule } from 'src/common/connections/users.module';
       name: Subject.name,
       schema: SubjectSchema
     }]),
-    MongooseModule.forFeature([{
-      name: 'Block',
-      schema: BlockSchema
-    }]),
     CoursesModule,
     InscriptionsModule,
     UsersModule,
+    SchedulesModule,
   ],
   controllers: [SubjectsController],
   providers: [SubjectsService],

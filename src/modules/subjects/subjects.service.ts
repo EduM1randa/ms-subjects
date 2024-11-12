@@ -10,19 +10,19 @@ import { Model, Types } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Subject } from './schemas/subject.schema';
 import { CoursesService } from '../courses/courses.service';
-import { Block } from './schemas/block.schema';
 import { InscriptionsService } from '../inscriptions/inscriptions.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import { SchedulesService } from '../schedules/schedules.service';
 
 @Injectable()
 export class SubjectsService {
   constructor(
     @InjectModel(Subject.name) private subjectModel: Model<Subject>,
-    @InjectModel(Block.name) private blockModel: Model<Block>,
+    @Inject() private scheduleService: SchedulesService,
     @Inject() private coursesService: CoursesService,
     @Inject() private inscriptionsService: InscriptionsService,
-    @Inject('USERS_SERVICE') private usersService: ClientProxy,
+    @Inject('USERS_SERVICE') private readonly usersService: ClientProxy,
   ) {}
 
   async create(createSubjectDto: CreateSubjectDto): Promise<Subject> {
@@ -36,20 +36,38 @@ export class SubjectsService {
       throw new BadRequestException('Horario es requerido.');
     if (!teacher) throw new BadRequestException('Profesor es requerido.');
     if (!course) throw new BadRequestException('Curso es requerido.');
-    if (!isElective) throw new BadRequestException('Electivo es requerido.');
+    if (isElective === null)
+      throw new BadRequestException('Electivo es requerido.');
 
     const courseExists = await this.coursesService.findById(course.toString());
     if (!courseExists) {
       throw new NotFoundException('Curso no encontrado.');
     }
 
-    const blockExists = await this.findBlocks(schedule);
-    if (!blockExists) {
-      throw new NotFoundException('Bloque(s) no encontrado(s).');
+    const shceduleExist = await this.scheduleService.findSchedules(schedule);
+    if (!shceduleExist) {
+      throw new NotFoundException('Horarios(s) no encontrado(s).');
+    }
+
+    const schedulesAvailable = await this.areSchedulesAvailable(
+      course.toString(),
+      schedule,
+    );
+    if (!schedulesAvailable) {
+      throw new BadRequestException('Horarios no disponibles para el curso.');
+    }
+
+    const existingSubject = await this.subjectModel
+      .findOne({ name, courseId })
+      .exec();
+    if (existingSubject) {
+      throw new BadRequestException(
+        `La asignatura ${name} ya está creada para el curso dado.`,
+      );
     }
 
     const existTeacher = await lastValueFrom(
-      this.usersService.send('get-teacher-by-id', teacherId),
+      this.usersService.send({ cmd: 'get-teacher-by-id' }, teacherId),
     );
     if (!existTeacher) throw new NotFoundException('Profesor no encontrado.');
 
@@ -67,23 +85,6 @@ export class SubjectsService {
     } catch (error) {
       throw new InternalServerErrorException('Error al crear materia.');
     }
-  }
-
-  async getBlocks(): Promise<Block[]> {
-    try {
-      const blocks = await this.blockModel.find();
-      if (blocks.length === 0) {
-        throw new NotFoundException('No se encontraron bloques.');
-      }
-      return blocks;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener bloques.');
-    }
-  }
-
-  async findBlocks(ids: string[]) {
-    const blocks = await this.blockModel.find({ _id: { $in: ids } });
-    return blocks.length === ids.length;
   }
 
   async findById(id: string): Promise<Subject> {
@@ -177,5 +178,25 @@ export class SubjectsService {
     } catch (error) {
       throw new InternalServerErrorException('Error al actualizar materia.');
     }
+  }
+
+  async areSchedulesAvailable(
+    courseId: string,
+    scheduleIds: string[],
+  ): Promise<boolean> {
+    const subjects = await this.subjectModel
+      .find({ courseId })
+      .populate('schedule')
+      .exec();
+
+    for (const sucject of subjects) {
+      if (!sucject.schedule) continue;
+      for (const schedule of sucject.schedule) {
+        if (scheduleIds.includes(schedule.toString())) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }
