@@ -14,6 +14,8 @@ import { InscriptionsService } from '../inscriptions/inscriptions.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
 import { SchedulesService } from '../schedules/schedules.service';
+import { Schedule } from '../schedules/schemas/schedule.schema';
+import { EducationalLevel } from 'src/common/enum/educational-level.enum';
 
 @Injectable()
 export class SubjectsService {
@@ -49,11 +51,14 @@ export class SubjectsService {
       throw new NotFoundException('Horarios(s) no encontrado(s).');
     }
 
-    const schedulesAvailable = await this.areSchedulesAvailable(
+    const schedulesAvailable = await this.getAvailableSchedules(
       course.toString(),
-      schedule,
     );
-    if (!schedulesAvailable) {
+    if (
+      (schedule || []).some(
+        (id) => !schedulesAvailable.find((s) => s._id?.toString() === id),
+      )
+    ) {
       throw new BadRequestException('Horarios no disponibles para el curso.');
     }
 
@@ -70,6 +75,10 @@ export class SubjectsService {
       this.usersService.send({ cmd: 'get-teacher-by-id' }, teacherId),
     );
     if (!existTeacher) throw new NotFoundException('Profesor no encontrado.');
+
+    if(isElective && courseExists.educationalLevel !== EducationalLevel.MEDIA) {
+      throw new BadRequestException('Los electivos solo pueden ser asignados a cursos de media.');
+    }
 
     const subject: Subject = {
       name,
@@ -180,23 +189,25 @@ export class SubjectsService {
     }
   }
 
-  async areSchedulesAvailable(
-    courseId: string,
-    scheduleIds: string[],
-  ): Promise<boolean> {
+  async getAvailableSchedules(courseId: string): Promise<Schedule[]> {
     const subjects = await this.subjectModel
       .find({ courseId })
       .populate('schedule')
       .exec();
+    const occupiedSchedules = new Set<string>();
 
-    for (const sucject of subjects) {
-      if (!sucject.schedule) continue;
-      for (const schedule of sucject.schedule) {
-        if (scheduleIds.includes(schedule.toString())) {
-          return false;
-        }
-      }
-    }
-    return true;
+    subjects.forEach((subject) => {
+      subject.schedule?.forEach((schedule) => {
+        occupiedSchedules.add(schedule.toString());
+      });
+    });
+
+    const allSchedules = await this.scheduleService.getSchedules();
+
+    const availableSchedules = allSchedules.filter(
+      (schedule) => !occupiedSchedules.has(schedule._id?.toString() || ''),
+    );
+
+    return availableSchedules;
   }
 }

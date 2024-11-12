@@ -14,6 +14,7 @@ import { CoursesService } from '../courses/courses.service';
 import { InscriptionStatus } from 'src/common/enum/inscription-status.enum';
 import { ClientProxy } from '@nestjs/microservices';
 import { lastValueFrom } from 'rxjs';
+import { InscriptionType } from 'src/common/enum/inscription-type.enum';
 
 @Injectable()
 export class InscriptionsService {
@@ -26,12 +27,22 @@ export class InscriptionsService {
   async create(
     createInscriptionDto: CreateInscriptionDto,
   ): Promise<Inscription> {
-    const { studentId, courseId, date, status } = createInscriptionDto;
+    const { studentId, courseId, electiveId, createAt, status, type } =
+      createInscriptionDto;
+
     const student = new Types.ObjectId(studentId);
-    const course = new Types.ObjectId(courseId);
+    const course = courseId ? new Types.ObjectId(courseId) : null;
+    const elective = electiveId ? new Types.ObjectId(electiveId) : null;
+
     if (!student) throw new BadRequestException('Student is required');
-    if (!course) throw new BadRequestException('course is required');
-    if (!date) throw new BadRequestException('Date is required');
+    if (!type) throw new BadRequestException('Type is required');
+
+    if (!course && type !== InscriptionType.COURSE)
+      throw new BadRequestException('course is required');
+    if (!elective && type !== InscriptionType.ELECT)
+      throw new BadRequestException('Elective is required');
+
+    if (!createAt) throw new BadRequestException('Date is required');
     if (!status) throw new BadRequestException('Status is required');
 
     const existStudent = await lastValueFrom(
@@ -39,41 +50,88 @@ export class InscriptionsService {
     );
     if (!existStudent) throw new NotFoundException('Student not found');
 
-    if (!(await this.coursesService.findById(course.toString()))) {
-      throw new NotFoundException('Subject not found');
-    }
+    if (type === InscriptionType.COURSE && elective)
+      throw new BadRequestException('Elective is not required');
 
-    if (await this.findInscription(student.toString(), course.toString())) {
-      throw new BadRequestException('Inscription already exists');
-    }
-
-    if (new Date(date) < new Date())
+    if (type === InscriptionType.ELECT && course)
+      throw new BadRequestException('Course is not required');
+    
+    if (new Date(createAt) < new Date())
       throw new BadRequestException('Date must be greater than');
     if (!Object.values(InscriptionStatus).includes(status))
       throw new BadRequestException('Invalid status');
 
-    const inscription: Inscription = {
-      studentId: student,
-      courseId: course,
-      createAt: date,
-      status,
-    };
+    var createdInscription;
+
+    if(course) {
+      if (!(await this.coursesService.findById(course.toString()))) {
+        throw new NotFoundException('Course not found');
+      }
+  
+      if (await this.findInscriptionByCourse(student.toString(), course.toString())) {
+        throw new BadRequestException('Inscription already exists');
+      }
+
+      const inscription: Inscription = {
+        studentId: student,
+        courseId: course,
+        createAt: createAt,
+        status,
+        type,
+      };
+      
+      createdInscription = new this.inscriptionModel(inscription); 
+    }
+
+    if(elective) {
+      if (!(await this.coursesService.findById(elective.toString()))) {
+        throw new NotFoundException('Elective not found');
+      }
+  
+      if (await this.findInscriptionByElect(student.toString(), elective.toString())) {
+        throw new BadRequestException('Inscription already exists');
+      }
+
+      const inscription: Inscription = {
+        studentId: student,
+        electiveId: elective,
+        createAt: createAt,
+        status,
+        type,
+      };
+      
+      createdInscription = new this.inscriptionModel(inscription);
+    }
+
+    if (!createdInscription) {
+      throw new InternalServerErrorException('Failed to create inscription');
+    }
 
     try {
-      const createdInscription = new this.inscriptionModel(inscription);
-      return createdInscription.save();
+      return await createdInscription.save();
     } catch (error) {
       throw new InternalServerErrorException('Error creating inscription');
     }
   }
 
-  async findInscription(
+  async findInscriptionByCourse(
     student: string,
     course: string,
   ): Promise<Inscription | null> {
     const exist = await this.inscriptionModel.findOne({
       studentId: student,
       courseId: course,
+    });
+    return exist;
+  }
+
+  async findInscriptionByElect(
+    student: string,
+    elective: string,
+  ): Promise<Inscription | null> {
+    const exist = await this.inscriptionModel.findOne({
+      studentId: student,
+      electiveId: elective,
     });
     return exist;
   }

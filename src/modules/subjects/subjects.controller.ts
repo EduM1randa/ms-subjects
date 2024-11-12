@@ -4,6 +4,7 @@ import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { Subject } from './schemas/subject.schema';
+import { Schedule } from '../schedules/schemas/schedule.schema';
 
 @Controller('subjects')
 export class SubjectsController {
@@ -48,5 +49,13 @@ export class SubjectsController {
   ): Promise<Subject> {
     const { id, updateSubjectDto } = data;
     return await this.subjectsService.update(id, updateSubjectDto);
+  }
+
+  @MessagePattern({ cmd: 'get-available-shcedules' })
+  async getAvailableSchedules(
+    @Payload() data: { courseId: string },
+  ): Promise<Schedule[]> {
+    const { courseId } = data;
+    return await this.subjectsService.getAvailableSchedules(courseId);
   }
 }

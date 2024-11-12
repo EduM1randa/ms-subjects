@@ -1,12 +1,16 @@
-import { IsEnum, IsMongoId, IsNotEmpty } from "class-validator";
+import { IsDate, IsEnum, IsMongoId, IsNotEmpty, IsOptional } from "class-validator";
 import { InscriptionStatus } from "src/common/enum/inscription-status.enum";
 
 export class UpdateInscriptionDto {
   @IsMongoId()
-  @IsNotEmpty()
+  @IsOptional()
   courseId?: string;
 
   @IsEnum(InscriptionStatus)
-  @IsNotEmpty()
+  @IsOptional()
   status?: InscriptionStatus;
+
+  @IsDate()
+  @IsNotEmpty()
+  updatedAt?: Date;
 }
