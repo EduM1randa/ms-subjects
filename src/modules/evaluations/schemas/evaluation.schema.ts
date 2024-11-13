@@ -1,6 +1,7 @@
-import { Prop, SchemaFactory } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types } from "mongoose";
 
+@Schema()
 export class Evaluation {
     _id?: Types.ObjectId;
 
@@ -8,7 +9,7 @@ export class Evaluation {
     subjectId?: Types.ObjectId;
 
     @Prop({ required: true })
-    description?: string;
+    description?: string;  
 
     @Prop({ required: true })
     totalScore?: number;

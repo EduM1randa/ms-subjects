@@ -6,7 +6,6 @@ import {
     IsArray,
     ArrayNotEmpty
 } from 'class-validator';
-import { Schedule } from 'src/modules/schedules/schemas/schedule.schema';
 
 export class CreateSubjectDto {
     @IsString()

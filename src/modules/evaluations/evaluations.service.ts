@@ -8,7 +8,7 @@ import {
 import { CreateEvaluationDto } from './dto/create-evaluation.dto';
 import { UpdateEvaluationDto } from './dto/update-evaluation.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Evaluation } from './schemas/evaluation.schema';
 import { SubjectsService } from '../subjects/subjects.service';
 
@@ -41,7 +41,11 @@ export class EvaluationsService {
       throw new NotFoundException('Subject not found');
     }
 
-    if (await this.findEvaluation(subjectId.toString(), date)) {
+    const [day, month, year] = date.split('-');
+    const formattedDate = `${year}-${month}-${day}`;
+    const evaluationDate = new Date(formattedDate);
+
+    if (await this.findEvaluation(subjectId.toString(), evaluationDate)) {
       throw new NotFoundException('Evaluation already exists in this date');
     }
 
@@ -54,7 +58,7 @@ export class EvaluationsService {
       subjectId,
       description,
       totalScore,
-      date,
+      date: evaluationDate,
     };
 
     try {
@@ -102,12 +106,39 @@ export class EvaluationsService {
     id: string,
     updateEvaluationDto: UpdateEvaluationDto,
   ): Promise<Evaluation> {
+  
+    console.log(updateEvaluationDto);
+    console.log(id);
+  
+    // Verificar si el ID es un ObjectId válido
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+  
     try {
+      const evaluation = await this.evaluationModel.findById(id);
+      if (!evaluation) {
+        throw new NotFoundException('Evaluation not found');
+      }
+  
+      if (updateEvaluationDto.date) {
+        const [day, month, year] = updateEvaluationDto.date.split('-');
+        const formattedDate = `${year}-${month}-${day}`;
+        const evaluationDate = new Date(formattedDate);
+        if (isNaN(evaluationDate.getTime())) {
+          throw new BadRequestException('Invalid date format');
+        }
+        updateEvaluationDto.date = evaluationDate.toString();
+      }
+  
       const existingEvaluation = await this.evaluationModel.findByIdAndUpdate(
         id,
         updateEvaluationDto,
         { new: true },
       );
+  
+      console.log(existingEvaluation);
+  
       if (!existingEvaluation) {
         throw new NotFoundException('Evaluation not found');
       }
@@ -119,7 +150,8 @@ export class EvaluationsService {
 
   async findBySubject(subjectId: string): Promise<Evaluation[]> {
     try {
-      const evaluations = await this.evaluationModel.find({ subjectId });
+      const evaluations = await this.evaluationModel.find({ 
+        subjectId: new Types.ObjectId(subjectId) });
       if (!evaluations) {
         throw new NotFoundException('Evaluations not found');
       }

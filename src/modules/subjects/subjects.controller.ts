@@ -10,24 +10,24 @@ import { Schedule } from '../schedules/schemas/schedule.schema';
 export class SubjectsController {
   constructor(private readonly subjectsService: SubjectsService) {}
 
-  @MessagePattern({ cmd: 'create_subject' })
+  @MessagePattern({ cmd: 'create-subject' })
   async create(
     @Payload() createSubjectDto: CreateSubjectDto,
   ): Promise<Subject> {
     return await this.subjectsService.create(createSubjectDto);
   }
 
-  @MessagePattern({ cmd: 'get_subject_by_id' })
+  @MessagePattern({ cmd: 'get-subject-by-id' })
   async findOne(@Payload() id: string): Promise<Subject> {
     return await this.subjectsService.findById(id);
   }
 
-  @MessagePattern({ cmd: 'get_subjects_by_course' })
+  @MessagePattern({ cmd: 'get-subjects-by-course' })
   async findByCourse(@Payload() courseId: string): Promise<Subject[]> {
     return await this.subjectsService.findSubjectsByCourse(courseId);
   }
 
-  @MessagePattern({ cmd: 'get_subjects_by_student' })
+  @MessagePattern({ cmd: 'get-subjects-by-student' })
   async findByStudent(
     @Payload() data: { studentId: string; year: number },
   ): Promise<Subject[]> {
@@ -35,7 +35,7 @@ export class SubjectsController {
     return await this.subjectsService.findSubjectsByStudent(studentId, year);
   }
 
-  @MessagePattern({ cmd: 'get_subjects_by_teacher' })
+  @MessagePattern({ cmd: 'get-subjects-by-teacher' })
   async findByTeacher(
     @Payload() data: { teacherId: string; year: number },
   ): Promise<Subject[]> {
@@ -43,7 +43,7 @@ export class SubjectsController {
     return await this.subjectsService.findSubjectsByTeacher(teacherId, year);
   }
 
-  @MessagePattern({ cmd: 'update_subject' })
+  @MessagePattern({ cmd: 'update-subject' })
   async update(
     @Payload() data: { id: string; updateSubjectDto: UpdateSubjectDto },
   ): Promise<Subject> {
@@ -58,4 +58,10 @@ export class SubjectsController {
     const { courseId } = data;
     return await this.subjectsService.getAvailableSchedules(courseId);
   }
+
+  @MessagePattern({ cmd: 'get-subjects' })
+  async findAll(): Promise<Subject[]> {
+    return await this.subjectsService.findAll();
+  }
+
 }

@@ -1,9 +1,10 @@
-import { Prop, SchemaFactory } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Types } from "mongoose";
 import { InscriptionStatus } from "../../../common/enum/inscription-status.enum";
 import { addUpdatedAtMiddleware } from "src/common/guards/inscription.middleguard";
 import { InscriptionType } from "src/common/enum/inscription-type.enum";
 
+@Schema()
 export class Inscription {
     _id?: Types.ObjectId;
 

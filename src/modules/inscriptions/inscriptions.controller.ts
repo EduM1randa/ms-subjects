@@ -9,27 +9,30 @@ import { Inscription } from './schemas/inscription.schema';
 export class InscriptionsController {
   constructor(private readonly inscriptionsService: InscriptionsService) {}
 
-  @MessagePattern({ cmd: 'create_inscription' })
+  @MessagePattern({ cmd: 'create-inscription' })
   async create(
     @Payload() createInscriptionDto: CreateInscriptionDto,
-  ): Promise<Inscription> {
+  ): Promise<Inscription | null> {
     return await this.inscriptionsService.create(createInscriptionDto);
   }
 
-  @MessagePattern({ cmd: 'get_all_inscriptions' })
+  @MessagePattern({ cmd: 'get-all-inscriptions' })
   async findAll(): Promise<Inscription[]> {
     return await this.inscriptionsService.findAll();
   }
 
-  @MessagePattern({ cmd: 'get_inscription_by_student_and_course' })
+  @MessagePattern({ cmd: 'get-inscription-by-student-and-course' })
   async findInscription(
     @Payload() data: { studentId: string; courseId: string },
   ): Promise<Inscription | null> {
     const { studentId, courseId } = data;
-    return await this.inscriptionsService.findInscription(studentId, courseId);
+    return await this.inscriptionsService.findInscriptionByCourse(
+      studentId,
+      courseId,
+    );
   }
 
-  @MessagePattern({ cmd: 'update_inscription' })
+  @MessagePattern({ cmd: 'update-inscription' })
   async update(
     @Payload() data: { id: string; updateInscriptionDto: UpdateInscriptionDto },
   ): Promise<Inscription> {

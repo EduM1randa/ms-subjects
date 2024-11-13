@@ -27,7 +27,7 @@ export class InscriptionsService {
   async create(
     createInscriptionDto: CreateInscriptionDto,
   ): Promise<Inscription> {
-    const { studentId, courseId, electiveId, createAt, status, type } =
+    const { studentId, courseId, electiveId, status, type } =
       createInscriptionDto;
 
     const student = new Types.ObjectId(studentId);
@@ -37,16 +37,15 @@ export class InscriptionsService {
     if (!student) throw new BadRequestException('Student is required');
     if (!type) throw new BadRequestException('Type is required');
 
-    if (!course && type !== InscriptionType.COURSE)
+    if (!course && type === InscriptionType.COURSE)
       throw new BadRequestException('course is required');
-    if (!elective && type !== InscriptionType.ELECT)
+    if (!elective && type === InscriptionType.ELECT)
       throw new BadRequestException('Elective is required');
 
-    if (!createAt) throw new BadRequestException('Date is required');
     if (!status) throw new BadRequestException('Status is required');
 
     const existStudent = await lastValueFrom(
-      this.usersService.send('get-student', studentId),
+      this.usersService.send({cmd: 'get-student'}, studentId),
     );
     if (!existStudent) throw new NotFoundException('Student not found');
 
@@ -56,14 +55,13 @@ export class InscriptionsService {
     if (type === InscriptionType.ELECT && course)
       throw new BadRequestException('Course is not required');
     
-    if (new Date(createAt) < new Date())
-      throw new BadRequestException('Date must be greater than');
+    const createAt = new Date();
     if (!Object.values(InscriptionStatus).includes(status))
       throw new BadRequestException('Invalid status');
 
-    var createdInscription;
+    let createdInscription;
 
-    if(course) {
+    if(course !== null) {
       if (!(await this.coursesService.findById(course.toString()))) {
         throw new NotFoundException('Course not found');
       }
@@ -79,11 +77,15 @@ export class InscriptionsService {
         status,
         type,
       };
+
+      console.log(inscription);
       
       createdInscription = new this.inscriptionModel(inscription); 
+
+      console.log(createdInscription)
     }
 
-    if(elective) {
+    if(elective !== null) {
       if (!(await this.coursesService.findById(elective.toString()))) {
         throw new NotFoundException('Elective not found');
       }
@@ -107,7 +109,10 @@ export class InscriptionsService {
       throw new InternalServerErrorException('Failed to create inscription');
     }
 
+    console.log(createdInscription);
+
     try {
+      console.log(createdInscription);
       return await createdInscription.save();
     } catch (error) {
       throw new InternalServerErrorException('Error creating inscription');
@@ -151,6 +156,15 @@ export class InscriptionsService {
     id: string,
     updateInscriptionDto: UpdateInscriptionDto,
   ): Promise<Inscription> {
+    const inscription = await this.inscriptionModel.findById(id);
+    if(!inscription) throw new NotFoundException('Inscription not found');
+
+    if (!inscription?.courseId && updateInscriptionDto.courseId)
+      throw new BadRequestException('Course is not required');
+
+    if (!inscription?.electiveId && updateInscriptionDto.electiveId)
+      throw new BadRequestException('Elective is not required');
+
     try {
       const updatedInscription = await this.inscriptionModel.findByIdAndUpdate(
         id,
@@ -166,13 +180,18 @@ export class InscriptionsService {
   }
 
   async findByStudent(studentId: string, year: number): Promise<Inscription> {
+    const startOfYear = new Date(year, 0, 1);
+    const endOfYear = new Date(year + 1, 0, 1);
+
     const activeInscription = await this.inscriptionModel.findOne({
-      studentId,
-      createAt: year,
+      studentId: new Types.ObjectId(studentId),
+      createAt: { $gte: startOfYear, $lt: endOfYear },
       status: InscriptionStatus.ACTIVE,
     });
-    if (!activeInscription)
+
+    if (!activeInscription) 
       throw new NotFoundException('Inscription not found');
+
     return activeInscription;
   }
 }

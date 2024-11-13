@@ -40,7 +40,7 @@ export class GradesService {
     if (!grade) throw new BadRequestException('Grade is required');
 
     const existStudent = await lastValueFrom(
-      this.usersService.send('get-student', studentId),
+      this.usersService.send({cmd:'get-student'}, studentId),
     );
     if (!existStudent) throw new NotFoundException('Student not found');
 
@@ -82,7 +82,9 @@ export class GradesService {
 
   async findByStudent(studentId: string): Promise<Grade[]> {
     try {
-      const grades = await this.gradeModel.find({ studentId });
+      const grades = await this.gradeModel.find({ 
+        studentId: new Types.ObjectId(studentId)
+       });
       if (grades.length === 0) throw new NotFoundException('No grades found');
       return grades;
     } catch (error) {

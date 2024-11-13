@@ -6,6 +6,10 @@ export class UpdateInscriptionDto {
   @IsOptional()
   courseId?: string;
 
+  @IsMongoId()
+  @IsOptional()
+  electiveId?: string;
+
   @IsEnum(InscriptionStatus)
   @IsOptional()
   status?: InscriptionStatus;

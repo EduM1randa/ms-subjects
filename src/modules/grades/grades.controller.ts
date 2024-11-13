@@ -9,24 +9,24 @@ import { Grade } from './schemas/grade.schema';
 export class GradesController {
   constructor(private readonly gradesService: GradesService) {}
 
-  @MessagePattern({ cmd: 'create_grade' })
+  @MessagePattern({ cmd: 'create-grade' })
   async create(
     @Payload() createGradeDto: CreateGradeDto
   ): Promise<Grade> {
     return await this.gradesService.create(createGradeDto);
   }
 
-  @MessagePattern({ cmd: 'get_all_grades' })
+  @MessagePattern({ cmd: 'get-all-grades' })
   async findAll(): Promise<Grade[]> {
     return await this.gradesService.findAll();
   }
 
-  @MessagePattern({ cmd: 'get_grade_by_id' })
+  @MessagePattern({ cmd: 'get-grade-by-id' })
   async findByStudent(@Payload() studentId: string): Promise<Grade[]> {
     return await this.gradesService.findByStudent(studentId);
   }
 
-  @MessagePattern({ cmd: 'update_grade' })
+  @MessagePattern({ cmd: 'update-grade' })
   async update(
     @Payload() data: { id: string, updateGradeDto: UpdateGradeDto }
   ): Promise<Grade> {

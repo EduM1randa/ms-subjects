@@ -11,7 +11,6 @@ export class CoursesController {
 
   @MessagePattern({ cmd: 'create-course' })
   async create(@Payload() createCourseDto: CreateCourseDto): Promise<Course> {
-    console.log('createCourseDto', createCourseDto);
     return await this.coursesService.create(createCourseDto);
   }
 
@@ -22,6 +21,9 @@ export class CoursesController {
 
   @MessagePattern({ cmd: 'get-course-by-id' })
   async findOne(@Payload() id: string): Promise<Course> {
+
+    console.log('id', id);
+    
     return await this.coursesService.findById(id);
   }
 

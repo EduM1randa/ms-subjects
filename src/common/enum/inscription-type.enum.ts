@@ -1,4 +1,4 @@
 export enum InscriptionType {
-    COURSE = 'Course',
+    COURSE = 'Curso',
     ELECT = 'Electivo',
 }

@@ -110,7 +110,8 @@ export class SubjectsService {
 
   async findSubjectsByCourse(courseId: string): Promise<Subject[]> {
     try {
-      const subjects = await this.subjectModel.find({ courseId });
+      const courseObjectId = new Types.ObjectId(courseId);
+      const subjects = await this.subjectModel.find({ courseId: courseObjectId });
       if (subjects.length === 0) {
         throw new NotFoundException('No se encontraron materias.');
       }
@@ -124,6 +125,9 @@ export class SubjectsService {
     studentId: string,
     year: number,
   ): Promise<Subject[]> {
+    
+    console.log('findSubjectsByStudent', studentId, year);
+
     try {
       const inscription = await this.inscriptionsService.findByStudent(
         studentId,
@@ -190,11 +194,14 @@ export class SubjectsService {
   }
 
   async getAvailableSchedules(courseId: string): Promise<Schedule[]> {
-    const subjects = await this.subjectModel
-      .find({ courseId })
-      .populate('schedule')
-      .exec();
+      const subjects = await this.subjectModel.find({
+        courseId: new Types.ObjectId(courseId),
+      });
+
+    console.log(subjects);
+    
     const occupiedSchedules = new Set<string>();
+
 
     subjects.forEach((subject) => {
       subject.schedule?.forEach((schedule) => {
@@ -206,8 +213,20 @@ export class SubjectsService {
 
     const availableSchedules = allSchedules.filter(
       (schedule) => !occupiedSchedules.has(schedule._id?.toString() || ''),
-    );
+    ); 
 
     return availableSchedules;
+  }
+
+  async findAll(): Promise<Subject[]> {
+    try {
+      const subjects = await this.subjectModel.find();
+      if (subjects.length === 0) {
+        throw new NotFoundException('No se encontraron materias.');
+      }
+      return subjects;
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener materias.');
+    }
   }
 }

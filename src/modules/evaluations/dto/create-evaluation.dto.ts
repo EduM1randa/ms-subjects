@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsDate, IsMongoId } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString, IsDate, IsMongoId, Matches } from 'class-validator';
 
 export class CreateEvaluationDto {
   @IsMongoId()
@@ -13,7 +13,8 @@ export class CreateEvaluationDto {
   @IsNotEmpty()
   totalScore?: number;
 
-  @IsDate()
+  @IsString()
   @IsNotEmpty()
-  date?: Date;
+  @Matches(/^\d{2}-\d{2}-\d{4}$/)
+  date?: string;
 }

@@ -9,14 +9,14 @@ import { Evaluation } from './schemas/evaluation.schema';
 export class EvaluationsController {
   constructor(private readonly evaluationsService: EvaluationsService) {}
 
-  @MessagePattern({ cmd: 'create_evaluation' })
+  @MessagePattern({ cmd: 'create-evaluation' })
   async create(
     @Payload() createEvaluationDto: CreateEvaluationDto,
   ): Promise<Evaluation> {
     return await this.evaluationsService.create(createEvaluationDto);
   }
 
-  @MessagePattern({ cmd: 'update_evaluation' })
+  @MessagePattern({ cmd: 'update-evaluation' })
   async update(
     @Payload() data: { id: string; updateEvaluationDto: UpdateEvaluationDto },
   ): Promise<Evaluation> {
@@ -24,17 +24,17 @@ export class EvaluationsController {
     return await this.evaluationsService.update(id, updateEvaluationDto);
   }
 
-  @MessagePattern({ cmd: 'get_all_evaluations' })
+  @MessagePattern({ cmd: 'get-all-evaluations' })
   async findAll(): Promise<Evaluation[]> {
     return await this.evaluationsService.findAll();
   }
 
-  @MessagePattern({ cmd: 'get_evaluation_by_id' })
+  @MessagePattern({ cmd: 'get-evaluation-by-id' })
   async findOne(@Payload() id: string): Promise<Evaluation> {
     return await this.evaluationsService.findById(id);
   }
 
-  @MessagePattern({ cmd: 'find_evaluations_by_subject' })
+  @MessagePattern({ cmd: 'find-evaluations-by-subject' })
   async findBySubject(@Payload() subjectId: string): Promise<Evaluation[]> {
     return await this.evaluationsService.findBySubject(subjectId);
   }

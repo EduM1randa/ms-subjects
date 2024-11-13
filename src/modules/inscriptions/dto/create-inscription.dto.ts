@@ -15,10 +15,6 @@ export class CreateInscriptionDto {
   @IsOptional()
   electiveId?: string;
 
-  @IsDate()
-  @IsNotEmpty()
-  createAt?: Date;
-
   @IsEnum(InscriptionStatus)
   @IsNotEmpty()
   status?: InscriptionStatus;
