@@ -8,6 +8,8 @@ import { EvaluationsModule } from './modules/evaluations/evaluations.module';
 import { GradesModule } from './modules/grades/grades.module';
 import { UsersModule } from './common/connections/users.module';
 import { SchedulesModule } from './modules/schedules/schedules.module';
+import { ReportsModule } from './modules/reports/reports.module';
+import { PrinterModule } from './modules/printer/printer.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { SchedulesModule } from './modules/schedules/schedules.module';
     GradesModule,
     UsersModule,
     SchedulesModule,
+    ReportsModule,
+    PrinterModule,
   ],
   controllers: [],
   providers: [],

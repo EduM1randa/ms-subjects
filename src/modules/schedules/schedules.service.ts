@@ -29,7 +29,7 @@ export class SchedulesService {
 
   async getSchedules(): Promise<Schedule[]> {
     try {
-      const schedules = await this.scheduleModel.find();
+      const schedules = await this.scheduleModel.find().populate({ path: 'blockId' });
       if (schedules.length === 0) {
         throw new NotFoundException('No se encontraron horarios.');
       }

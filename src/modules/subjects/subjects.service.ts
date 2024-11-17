@@ -194,14 +194,10 @@ export class SubjectsService {
   }
 
   async getAvailableSchedules(courseId: string): Promise<Schedule[]> {
-      const subjects = await this.subjectModel.find({
-        courseId: new Types.ObjectId(courseId),
-      });
-
-    console.log(subjects);
-    
+    const subjects = await this.subjectModel.find({
+      courseId: new Types.ObjectId(courseId)
+    });
     const occupiedSchedules = new Set<string>();
-
 
     subjects.forEach((subject) => {
       subject.schedule?.forEach((schedule) => {

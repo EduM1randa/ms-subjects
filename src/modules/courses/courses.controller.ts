@@ -21,9 +21,6 @@ export class CoursesController {
 
   @MessagePattern({ cmd: 'get-course-by-id' })
   async findOne(@Payload() id: string): Promise<Course> {
-
-    console.log('id', id);
-    
     return await this.coursesService.findById(id);
   }
 
