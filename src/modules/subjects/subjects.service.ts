@@ -164,16 +164,12 @@ export class SubjectsService {
         teacherId: new Types.ObjectId(teacherId) 
       });
 
-      console.log('subjects', subjects);
-
       const filteredSubjects = subjects.filter(async (subject) => {
         const course = await this.coursesService.findById(
           subject.courseId?.toString() || '',
         );
         return course.year === year;
       });
-
-      console.log('filteredSubjects', filteredSubjects);
 
       if (filteredSubjects.length === 0) {
         throw new NotFoundException('No se encontraron materias asignadas.');

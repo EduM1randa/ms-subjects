@@ -40,8 +40,6 @@ export class SubjectsController {
     @Payload() data: { teacherId: string; year: number },
   ): Promise<Subject[]> {
 
-    console.log('data', data);
-
     const { teacherId, year } = data;
     return await this.subjectsService.findSubjectsByTeacher(teacherId, year);
   }
