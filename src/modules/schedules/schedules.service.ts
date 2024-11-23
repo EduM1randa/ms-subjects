@@ -51,7 +51,7 @@ export class SchedulesService {
 
   async findScheduleById(id: string): Promise<Schedule> {
     try {
-      const schedule = await this.scheduleModel.findById(id);
+      const schedule = await this.scheduleModel.findById(id).populate('blockId');
       if (!schedule) {
         throw new NotFoundException('Horario no encontrado.');
       }

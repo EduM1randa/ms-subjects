@@ -90,6 +90,9 @@ export class SubjectsService {
 
     try {
       const createdSubject = new this.subjectModel(subject);
+      await lastValueFrom(this.usersService.send(
+        { cmd: 'assign-subject-to-teacher' }, 
+        { teacherID: teacherId, subjectID: createdSubject._id }));
       return createdSubject.save();
     } catch (error) {
       throw new InternalServerErrorException('Error al crear materia.');
@@ -223,6 +226,32 @@ export class SubjectsService {
       return subjects;
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener materias.');
+    }
+  }
+
+  async getSubjectSchedule(id: string): Promise<Schedule[]> {
+    try {
+      const subject = await this.subjectModel.findById(id);
+      if (!subject) {
+        throw new NotFoundException('Materia no encontrada.');
+      };
+      const schedules = await this.scheduleService.findSchedules(
+        subject.schedule ? subject.schedule.map((id) => id.toString()) : [],
+      );
+      if(!schedules) {
+        throw new NotFoundException('No se encontraron horarios.');
+      };
+      let schedulesWithBlocks: Schedule[] = [];
+      for (const schedule of subject.schedule || []) {
+        const scheduleWithBlock = await this.scheduleService
+        .findScheduleById(schedule._id.toString());
+        if(scheduleWithBlock) {
+          schedulesWithBlocks.push(scheduleWithBlock);
+        }
+      }
+      return schedulesWithBlocks;
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener horario.');
     }
   }
 }

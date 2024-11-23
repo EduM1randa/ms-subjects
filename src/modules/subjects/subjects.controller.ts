@@ -64,4 +64,9 @@ export class SubjectsController {
     return await this.subjectsService.findAll();
   }
 
+  @MessagePattern({ cmd: 'get-subject-schedules' })
+  async getSubjectSchedule(@Payload() id: string): Promise<Schedule[]> {
+    return await this.subjectsService.getSubjectSchedule(id);
+  }
+
 }

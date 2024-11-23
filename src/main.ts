@@ -9,7 +9,7 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: ['amqps://mfivcrgg:3zQWvCAEyg_q0a7QS7m7e-whP-jp4pYL@prawn.rmq.cloudamqp.com/mfivcrgg'],
-      queue: 'test',
+      queue: 'test_edu',
       queueOptions: {
         durable: false
       },
