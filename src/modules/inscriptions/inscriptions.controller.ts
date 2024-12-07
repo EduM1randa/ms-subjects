@@ -39,4 +39,11 @@ export class InscriptionsController {
     const { id, updateInscriptionDto } = data;
     return await this.inscriptionsService.update(id, updateInscriptionDto);
   }
+
+  @MessagePattern({ cmd: "get-students-by-course" })
+  async getStudentsByCourse(
+    @Payload() courseId: string,
+  ) {
+    return await this.inscriptionsService.getStudentsByCourse(courseId);
+  }
 }

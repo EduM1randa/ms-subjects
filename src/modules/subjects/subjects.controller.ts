@@ -69,5 +69,4 @@ export class SubjectsController {
   async getSubjectSchedule(@Payload() id: string): Promise<Schedule[]> {
     return await this.subjectsService.getSubjectSchedule(id);
   }
-
 }

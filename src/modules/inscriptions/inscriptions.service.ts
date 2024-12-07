@@ -194,4 +194,23 @@ export class InscriptionsService {
 
     return activeInscription;
   }
+
+  async getStudentsByCourse(courseId: string) { // Add return type
+    const inscriptions = await this.inscriptionModel.find({
+      courseId: new Types.ObjectId(courseId),
+    });
+
+    if (inscriptions.length === 0) throw new NotFoundException('No students found');
+    let students = [];
+
+    for (const inscription of inscriptions) {
+      const student = await lastValueFrom(this.usersService.send(
+        { cmd: 'get-student' },
+        inscription.studentId,
+      ));
+      students.push(student);
+      console.log(student);
+    }
+    return students;
+  }
 }
