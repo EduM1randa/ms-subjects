@@ -162,4 +162,9 @@ export class EvaluationsService {
       );
     }
   }
+
+  async getEvaluationIdsBySubject(subjectId: string): Promise<Types.ObjectId[]> {
+    const evaluations = await this.evaluationModel.find({ subjectId: new Types.ObjectId(subjectId) });
+    return evaluations.map(evaluation => evaluation._id);
+  }
 }

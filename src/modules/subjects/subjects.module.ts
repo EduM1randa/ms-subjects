@@ -3,7 +3,6 @@ import { SubjectsService } from './subjects.service';
 import { SubjectsController } from './subjects.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Subject, SubjectSchema } from './schemas/subject.schema';
-import { BlockSchema } from '../schedules/schemas/block.schema';
 import { CoursesModule } from '../courses/courses.module';
 import { InscriptionsModule } from '../inscriptions/inscriptions.module';
 import { UsersModule } from 'src/common/connections/users.module';
