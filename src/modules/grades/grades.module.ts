@@ -24,5 +24,6 @@ import { Average, AverageSchema } from './schemas/average.schema';
   ],
   controllers: [GradesController],
   providers: [GradesService],
+  exports: [GradesService],
 })
 export class GradesModule {}

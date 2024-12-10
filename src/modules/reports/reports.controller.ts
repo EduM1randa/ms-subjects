@@ -7,8 +7,14 @@ export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @MessagePattern({ cmd: 'get-report' })
-  async getReporte(@Payload() data: any): Promise<string> {
-    const report = await this.reportsService.getReport();
+  async getReporte(@Payload() data: {
+    studentId: string,
+    year: number,
+  }): Promise<string> {
+    const report = await this.reportsService.getReport(
+      data.studentId,
+      data.year,
+    );
 
     return new Promise((resolve, reject) => {
       const chunks: Buffer[] = [];

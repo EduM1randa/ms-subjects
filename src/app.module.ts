@@ -10,6 +10,7 @@ import { UsersModule } from './common/connections/users.module';
 import { SchedulesModule } from './modules/schedules/schedules.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { PrinterModule } from './modules/printer/printer.module';
+import { AttendanceModule } from './common/connections/attendance.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { PrinterModule } from './modules/printer/printer.module';
     SchedulesModule,
     ReportsModule,
     PrinterModule,
+    AttendanceModule,
   ],
   controllers: [],
   providers: [],

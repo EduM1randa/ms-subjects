@@ -1,8 +1,14 @@
+import { NotFoundException } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import type {
   Content,
   StyleDictionary,
   TDocumentDefinitions,
 } from 'pdfmake/interfaces';
+import { lastValueFrom } from 'rxjs';
+import { CoursesService } from 'src/modules/courses/courses.service';
+import { GradesService } from 'src/modules/grades/grades.service';
+import { SubjectsService } from 'src/modules/subjects/subjects.service';
 
 const logo: Content = {
   image: 'src/assets/colegio-icon.png',
@@ -21,7 +27,52 @@ const styles: StyleDictionary = {
   },
 };
 
-export const pdfReport = (): TDocumentDefinitions => {
+export const pdfReport = async (
+  studentId: string,
+  year: number,
+  subjectsService: SubjectsService,
+  gradesService: GradesService,
+  courseService:CoursesService,
+  usersService: ClientProxy,
+  attendanceService: ClientProxy,
+): Promise<TDocumentDefinitions> => {
+  const student = await lastValueFrom(usersService.send({ cmd: 'get-student' }, studentId));
+  if(!student) throw new NotFoundException('Estudiante no encontrado.');
+
+  const subjects = await subjectsService.findSubjectsByStudent(studentId, year);
+  if(subjects.length === 0) throw new NotFoundException('No se encontraron materias.');
+  const courseId = subjects[0].courseId;
+  if (!courseId) throw new NotFoundException('No se encontró el curso.');
+  const course = await courseService.findById(courseId?.toString());
+
+  const attendance = await lastValueFrom(attendanceService
+    .send({ cmd: 'get-attendance-percentage' }, {studentId, courseId}));
+  if(!attendance) throw new NotFoundException('Asistencia no encontrada.');
+
+  const tableBody = [
+    [{text: 'Asignatura', alignment: 'left'}, {text: 'Nota', alignment: 'right'}],
+  ]
+
+  for (const subject of subjects) {
+    if (subject._id && subject.name) {
+      const average = await gradesService.getAverageByStudentAndSubject(
+        studentId, subject._id.toString());
+      tableBody.push([{text: subject.name, alignment: 'left'}, {text: average.toFixed(1) || '', alignment: 'right'}]);
+    }
+  }
+
+  tableBody.push(
+    [{
+      text: '',
+      alignment: ''
+    }, {
+      text: '',
+      alignment: ''
+    }],
+    [{ text: '% Asistencia: ', alignment: 'right' }, 
+      { text: `${attendance}%`, alignment: 'right' }]
+  );
+
   return {
     content: [
       {
@@ -62,7 +113,12 @@ export const pdfReport = (): TDocumentDefinitions => {
             fontSize: 13,
           },
           {
-            text: ['Eduardo Branco Miranda Cortés\n', '12.345.678-9\n', '1º Medio\n', '17/11/2024\n'],
+            text: [
+              `${student.names+' '+student.lastNames}\n`,
+              `${student.rut}\n`,
+              `${course.name+' '+course.educationalLevel}\n`,
+              `${new Date().toLocaleDateString()}\n`,
+            ],
             alignment: 'right',
             fontSize: 13,
           },
@@ -73,44 +129,7 @@ export const pdfReport = (): TDocumentDefinitions => {
         layout: 'lightHorizontalLines',
         table: {
           widths: ['*', 'auto'],
-          body: [
-            [{text: 'Asignatura', alignment: 'left'}, {text: 'Nota', alignment: 'right'}],
-            ['Matemáticas', '6.5'],
-            ['Lenguaje', '7.0'],
-            ['Historia', '6.0'],
-            ['Ciencias', '6.5'],
-            ['Inglés', '6.0'],
-            [
-              {},{}
-            ],
-            [
-              {
-                text:'% Asistencia: ', alignment:'right', fontSize: 13.5
-              }, 
-              {
-                text: '100',
-                fontSize: 13.5
-              }
-            ],
-            [
-              {
-                text:'Promedio General: ', 
-                alignment:'right', 
-                fillColor: 'black', 
-                color: 'white', 
-                bold: true,
-                fontSize: 13.5
-              }, 
-              {
-                text: '6.4', 
-                fillColor: 'black', 
-                alignment: 'left', 
-                color: 'white', 
-                bold: true,
-                fontSize: 13.5
-              },
-            ],
-          ],
+          body: tableBody,
         },
       },
       {
