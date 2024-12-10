@@ -26,6 +26,11 @@ export class GradesController {
     return await this.gradesService.findByStudent(studentId);
   }
 
+  @MessagePattern({ cmd: 'get-grades-by-evaluation' })
+  async findByEvaluation(@Payload() evaluationId: string): Promise<Grade[]> {
+    return await this.gradesService.findByEvaluation(evaluationId);
+  }
+
   @MessagePattern({ cmd: 'update-grade' })
   async update(
     @Payload() data: { id: string, updateGradeDto: UpdateGradeDto }

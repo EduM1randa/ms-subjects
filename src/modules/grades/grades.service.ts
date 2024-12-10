@@ -173,4 +173,16 @@ export class GradesService {
 
     return average;
   }
+
+  async findByEvaluation(evaluationId: string): Promise<Grade[]> {
+    try {
+      const grades = await this.gradeModel.find({
+        evaluationId: new Types.ObjectId(evaluationId),
+      });
+        if (grades.length === 0) throw new NotFoundException('No grades found');
+        return grades;
+      } catch (error) {
+        throw new InternalServerErrorException('Error getting grades');
+    }
+  }
 }
